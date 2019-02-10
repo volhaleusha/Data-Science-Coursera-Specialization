@@ -1,0 +1,163 @@
+---
+title: "Part 2 Basic Inferential Data_Analysis"
+output: pdf_document
+author: Volha Leusha
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set( message =FALSE, warning =FALSE)
+```
+
+In this paper analysis of the ToothGrowth dataset from Rdataset package is presented and basic summary of data is provided. In second part confidence intervals and hypothesis tests are used to compare tooth growth by supp and dose, with subsequent conclusions on results.
+
+
+##Dataset Base Analysis
+
+1. Load dataset from datasets library:  
+
+```{r}
+#Load the ToothGrowth data: 
+library(datasets)
+data("ToothGrowth")
+```
+
+2. Basic summary of data exploratory data analysis:
+```{r, echo = FALSE}
+#first glance on the data:
+head(ToothGrowth)
+
+#look into data description:
+str(ToothGrowth)
+summary(ToothGrowth)
+```
+
+The dataset is the length of odontoblasts (cells responsible for tooth growth) in 60 guinea pigs. Each animal received one of three dose levels of vitamin C (0.5, 1, and 2 mg/day) by one of two delivery methods, orange juice or ascorbic acid (a form of vitamin C and coded as VC).
+
+Dataset has 60 observarions of 3 variables:  
+
+- supp: factor with only two possible supplement types: OJ, VC with equal proportion
+- dose: numerical categorical variable that can take only 3 unique values (milligrams/day)
+```{r, echo = FALSE}
+#check for unique dose values
+unique(ToothGrowth$dose)
+```
+- len: numerical tooth length in range from 4.2 to 33.90 with mean 18.81 and standard deviation
+```{r, echo = FALSE}
+#find standard deviation for length
+sd(ToothGrowth$len)
+```
+
+## Tooth growth comparisson by supp and dose
+
+Plot dataset grouped by supplement type and dosage:
+
+```{r, echo = FALSE}
+#open ggplot2 library:
+library(ggplot2)
+
+#Plot dataset grouped by supplement type and dosage
+ggplot(ToothGrowth, aes(x=dose, y=len, shape=supp, color=supp)) +geom_point()
+```
+
+From the graph and table it can be seen that there is potential difference in tooth length between supplements, suggesting that pigs on supplement OJ  have longer teeth than on VC. Also, the bigger the dossage, the longer are teeth. To prove above assumptions, three unpaired t-tests are performed, taking into account following assumptions:  
+
+- The sample is representative of the population
+- Data follows bell-shaped distribution curve
+- Standard deviations of samples are approximately equal 
+
+1. First test:  
+Ho: there is no difference between tooth length with different supplements   
+Ha: there is difference between tooth length with different supplements   
+alpha =.05     
+
+```{r, echo = FALSE}
+# perform t-test for length vs supplement type:
+t.test(len~supp, data= ToothGrowth, var.equal = TRUE, paired= FALSE)
+```
+Confidence interval includes zero (and p-value is greater than alpha)  consequently  at 95% confidence level, there is no significant difference of the two means.
+
+2. Second test:  
+Ho: there is no difference between dose0.5 and 1.0 for tooth length  
+Ha: tooth length for dose 1.0 is bigger than for dose 0.5    
+alpha= .05  
+
+```{r, echo = FALSE}
+
+## perform t-test for length vs dosage 0.5 or 1.0:
+t.test(ToothGrowth$len[ToothGrowth$dose==1],ToothGrowth$len[ToothGrowth$dose==.5],
+       var.equal =TRUE, alternative = 'greater')
+```
+
+Confidence interval is fully above zero (and p-value is less than alpha) consequently at 95% confidence level null hypothesis can be rejected and it can be assumed that Ha is true. 
+
+3. Third test:    
+Ho: there is no difference between dose 1.0 and 2.0 for tooth length  
+Ha: tooth length for dose 2.0 is higher than for dose 1.0      
+alpha= .05    
+
+```{r, echo = FALSE}
+
+## perform t-test for length vs dosage 1.0 or 2.0:
+t.test(ToothGrowth$len[ToothGrowth$dose==2],ToothGrowth$len[ToothGrowth$dose==1],
+       var.equal =TRUE, alternative = 'greater')
+```
+
+Confidence interval is fully above zero (and p-value is less than alpha)  consequently at 95% confidence level null hypothesis can be rejected and it can be assumed that Ha is true.
+
+### Conclusions:  
+1. There is no enough evidence to say that supplement type effects tooth length  
+2. Dosage increase results in tooth length increase  
+
+## Appendix
+
+Following R code is used to generate results in the paper:
+
+```{r, results= 'hide', fig.show = 'hide'}
+#Load the ToothGrowth data: 
+
+library(datasets)
+data("ToothGrowth")
+
+#first glance on the data:
+head(ToothGrowth)
+
+#look into data description:
+str(ToothGrowth)
+summary(ToothGrowth)
+
+#check for unique dose values
+unique(ToothGrowth$dose)
+
+#find standard deviation for length
+sd(ToothGrowth$len)
+
+#open ggplot2 library:
+library(ggplot2)
+
+#Plot dataset grouped by supplement type and dosage
+ggplot(ToothGrowth, aes(x=dose, y=len, shape=supp, color=supp)) +geom_point()+
+    theme(plot.margin = margin(3,3,3,3, "cm"))
+
+#1. First test:  
+#Ho: there is no difference between tooth length with different supplements 
+#Ha: tooth length for supplement OJ in higher  
+##------------------------------------------------------------------------------
+# perform t-test for length vs supplement type:
+t.test(len~supp, data= ToothGrowth, var.equal = TRUE, paired= FALSE)
+
+#Second test: 
+#Ho: there is no difference between dose0.5 and 1.0 for tooth length
+#Ha: tooth length for dose 1.0 is higher than for dose 0.5  
+#-------------------------------------------------------------------------------
+## perform t-test for length vs dosage 1.0 or 2.0:
+t.test(ToothGrowth$len[ToothGrowth$dose==1],ToothGrowth$len[ToothGrowth$dose==.5],
+       var.equal =TRUE, alternative = 'greater')
+
+# Third test: 
+#Ho: there is no difference between dose 1.0 and 2.0 for tooth length
+#Ha: tooth length for dose 2.0 is higher than for dose 1.0  
+#-------------------------------------------------------------------------------
+## perform t-test for length vs dosage 1.0 or 2.0:
+t.test(ToothGrowth$len[ToothGrowth$dose==2],ToothGrowth$len[ToothGrowth$dose==1],
+       var.equal =TRUE, alternative = 'greater')
+```
