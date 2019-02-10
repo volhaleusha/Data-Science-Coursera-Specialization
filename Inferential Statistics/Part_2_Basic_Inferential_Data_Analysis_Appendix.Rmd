@@ -1,0 +1,81 @@
+---
+title: "Part 2 Appendix"
+output: pdf_document
+author: Volha Leusha
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#Load the ToothGrowth data: 
+library(datasets)
+data("ToothGrowth")
+
+#first glance on the data:
+head(ToothGrowth)
+
+#look into data description:
+str(ToothGrowth)
+summary(ToothGrowth)
+
+#check for unique dose values
+unique(ToothGrowth$dose)
+
+#find standard deviation for length
+sd(ToothGrowth$len)
+
+#open ggplot2 and gripExtra libraries:
+library(ggplot2)
+library(gridExtra)
+
+#Plot general tooth length:
+g1<- ggplot(data=ToothGrowth, aes(ToothGrowth$len))+geom_density()+
+    labs(title="General toothlength", x="")
+
+#Plot tooth length by supplements
+g2<- ggplot(data=ToothGrowth, aes(ToothGrowth$len, color=ToothGrowth$supp))+
+    geom_density()+labs(title="Tooth length by supplements ", x="")
+
+#Plot tooth length by dosage
+g3<- ggplot(data=ToothGrowth, aes(ToothGrowth$len, color =as.character(ToothGrowth$dose)))+
+    geom_density()+labs(title="Tooth length by dosage", x="")
+
+#arrange all three graphs on one page 
+grid.arrange(g1, g2, g3, nrow = 3)
+
+#Plot dataset grouped by supplement type and dosage
+ggplot(ToothGrowth, aes(x=dose, y=len, shape=supp, color=supp)) +geom_point()+
+    theme(plot.margin = margin(3,3,3,3, "cm"))
+
+#1. First test:  
+#Ho: there is no difference between tooth length with different supplements 
+#Ha: tooth length for supplement OJ in higher  
+##------------------------------------------------------------------------------
+#create new variable diff1 equal to difference between values of length with OJ 
+#and VC supplements (each supplement has equal amount of values in dataset= 30):
+diff1<-ToothGrowth$len[ToothGrowth$supp=="OJ"]-ToothGrowth$len[ToothGrowth$supp=="VC"]
+#perform t test
+t.test(diff1, data= ToothGrowth)$conf
+
+#Second test: 
+#Ho: there is no difference between dose0.5 and 1.0 for tooth length
+#Ha: tooth length for dose 1.0 is higher than for dose 0.5  
+#-------------------------------------------------------------------------------
+#create new variable diff2 equal to difference between values of dose 1.0
+# and dose 0.5 (each dose has equal amount of values in dataset = 20):
+diff2<- ToothGrowth$len[ToothGrowth$dose==1]-ToothGrowth$len[ToothGrowth$dose==.5]
+#perform t test
+t.test(diff2, data= ToothGrowth)
+
+# Third test: 
+#Ho: there is no difference between dose 1.0 and 2.0 for tooth length
+#Ha: tooth length for dose 2.0 is higher than for dose 1.0  
+#-------------------------------------------------------------------------------
+#create new variable diff2 equal to difference between values of dose 2.0
+# and dose 1.0 (each dose has equal amount of values in dataset = 20):
+diff3<- ToothGrowth$len[ToothGrowth$dose==2]-ToothGrowth$len[ToothGrowth$dose==1]
+#perform t test
+t.test(diff3, data= ToothGrowth)
+```
